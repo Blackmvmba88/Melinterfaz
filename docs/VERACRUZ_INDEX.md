@@ -63,5 +63,5 @@
 - Museos, parques, islas y edificios patrimoniales pueden tener restricciones o estar temporalmente cerrados.
 - No reutilizar puntuaciones ajenas como propias; no simular ventas o descuentos reales.
 
-## Siguiente integración
-Crear el buscador de sitios reales como una pestaña independiente de la demostración ficticia; después agregar ubicación confirmada, horario, accesibilidad, fotos con permiso y visitas verificadas. Boca del Río se catalogará por separado.
+## Integración en la aplicación
+El buscador de sitios reales está conectado como vista inicial, separado del radar DEMO. El archivo canónico se sirve desde `web/data/veracruz-places.json`. Las 49 fichas son candidatos, no un ranking. Dos fichas incluyen datos de visita contrastados en fuentes institucionales el 2026-11-03; Casa Museo Salvador Díaz Mirón incluye coordenadas obtenidas del enlace de Google Maps publicado por SIC. Solo estas coordenadas habilitan marcador, distancia y ruta; las demás fichas ofrecen una búsqueda por nombre en Google Maps con aviso para confirmar el destino. Horarios publicados no equivalen a estado «abierto ahora». Fotos, accesibilidad y visitas verificadas siguen pendientes. Boca del Río se catalogará por separado.

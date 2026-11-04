@@ -60,3 +60,12 @@ En Google Cloud, habilita **Maps JavaScript API** y facturación. Restringe la c
 Los negocios actuales siguen siendo ficticios: no se les asignan coordenadas reales ni rutas. Para incorporar un lugar verificado, añade `lat`, `lng` y `locationVerified: true` al registro, documentando su fuente. Entonces aparecerá su marcador y «Cómo llegar»; con GPS se calculará la distancia en línea recta. El radar sigue siendo una simulación y no representa la orientación física del teléfono. Places API aún no está integrada.
 
 Documentación: [carga de Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/load-maps-js-api) · [Maps URLs](https://developers.google.com/maps/documentation/urls/get-started).
+
+
+## Catálogo real y fichas
+
+La vista inicial **Lugares reales** carga los 49 candidatos de `web/data/veracruz-places.json`, con búsqueda sin distinción de acentos, categorías y fuentes institucionales. Córdoba muestra un estado vacío hasta tener catálogo documentado. **Radar DEMO** conserva la simulación por separado.
+
+Cada ficha muestra dirección, horario publicado, contacto y fecha de revisión cuando existen; los campos desconocidos se indican como pendientes. No se asignan puntuaciones, descuentos o fotos ficticias. Casa Museo Salvador Díaz Mirón tiene coordenadas publicadas por SIC y admite ruta exacta, marcador y distancia en línea recta. Las fichas sin coordenadas ofrecen **Buscar en Google Maps**, que requiere confirmar el resultado. **Ordenar cerca de mí** requiere GPS y excluye lugares sin coordenadas verificadas; no representa distancia por calles ni apertura en tiempo real.
+
+Para añadir ubicaciones al catálogo JSON usa `coordinates: {"lat": ..., "lng": ...}`, `verifiedCoordinates: true` y `coordinateSourceUrl`. La integración convierte estos campos al formato del mapa. Los datos de visita se acompañan de `detailsCheckedOn` y `sourceUrl`. Las fotos se añadirán cuando exista permiso de uso.

@@ -66,7 +66,11 @@
       "coordinates": null,
       "verifiedCoordinates": false,
       "partnerStatus": "not-affiliated",
-      "status": "candidate"
+      "status": "candidate",
+      "address": "Pedro Sainz de Baranda s/n, Col. Manuel Contreras, Veracruz, CP 91891",
+      "hours": "Martes a domingo, 09:30–16:30",
+      "phone": "+522299391330",
+      "detailsCheckedOn": "2026-11-03"
     },
     {
       "id": "ver-acuario",
@@ -303,10 +307,18 @@
       "rating": null,
       "ratingCount": 0,
       "discount": null,
-      "coordinates": null,
-      "verifiedCoordinates": false,
+      "coordinates": {
+        "lat": 19.198617828079,
+        "lng": -96.135865598917
+      },
+      "verifiedCoordinates": true,
       "partnerStatus": "not-affiliated",
-      "status": "candidate"
+      "status": "candidate",
+      "address": "Av. Zaragoza 322, Centro Histórico, Veracruz, CP 91700",
+      "hours": "Martes a domingo, 10:00–16:30",
+      "phone": "+522292002240",
+      "detailsCheckedOn": "2026-11-03",
+      "coordinateSourceUrl": "https://sic.cultura.gob.mx/ficha.php?estado_id=30&table=museo&table_id=157"
     },
     {
       "id": "ver-recinto-reforma",

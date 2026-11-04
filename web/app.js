@@ -1,3 +1,4 @@
+import { mountCatalog } from "./catalog.js";
 import { hasCoordinates, directionsUrl, distanceMeters, loadMap, updateMap } from "./maps.js";
 import { places, categories } from "./places.js";
 import { filterPlaces, relativeBearing, directionLabel } from "./logic.js";
@@ -6,6 +7,9 @@ const root = document.querySelector("#app");
 const state = { city:"Veracruz", category:"all", search:"", rating:0, heading:85, range:800 };
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 let position = null;
+let realMapCity="Veracruz",realMapPlaces=[];
+let activeMode="real";
+const syncMap=()=>updateMap(activeMode==="real"?realMapCity:state.city,activeMode==="real"?realMapPlaces:list(),position);
 const catalog = () => places.map(p => position && hasCoordinates(p) ? {...p,distance:distanceMeters(position,p)} : p);
 const list = () => filterPlaces(catalog(), {city:state.city,category:state.category,search:state.search,minimumRating:state.rating}).filter(p => p.distance <= state.range);
 const stars = score => `⭐ ${score.toFixed(1)}/6`;
@@ -25,7 +29,7 @@ function render() {
       <section class="results"><div class="section-title"><h2>📍 Explorar lugares</h2><span>${data.length} resultado(s)</span></div><div class="cards">${data.length?data.map(p=>`<article class="place"><div class="place-emoji">${p.emoji}</div><div class="place-main"><h3>${escapeHtml(p.name)}</h3>${directionsUrl(p)?`<a target="_blank" rel="noopener noreferrer" href="${escapeHtml(directionsUrl(p))}">Cómo llegar ↗</a>`:""}<p>${escapeHtml(p.description)}</p><div class="meta"><b>${stars(p.rating)}</b><span>· ${p.distance}m ${hasCoordinates(p)&&position?"GPS":"simulados"}</span><span>· ${directionLabel(relativeBearing(p.bearing,state.heading))}</span></div></div>${p.discount>0?`<span class="offer">-${p.discount}%<small>DEMO</small></span>`:""}</article>`).join(""):'<p class="empty">No hay resultados con estos filtros en el catálogo de prueba.</p>'}</div></section>
       <footer>La calificación de 6 estrellas no se vende · MEL Family y monetización son módulos futuros, no activos · <a href="https://github.com/Blackmvmba88/Melinterfaz">GitHub</a></footer>
     </main>`;
-  updateMap(state.city, data, position);
+  syncMap();
   root.querySelector("#city").addEventListener("change", e => {state.city=e.target.value;render()});
   root.querySelector("#search").addEventListener("input", e => {const cursor=e.target.selectionStart;state.search=e.target.value;render();const input=root.querySelector("#search");input.focus();input.setSelectionRange(cursor,cursor)});
   root.querySelector("#rating").addEventListener("change", e => {state.rating=Number(e.target.value);render()});
@@ -37,7 +41,7 @@ render();
 
 const panel=document.createElement("section");
 panel.className="map-panel";
-panel.innerHTML=`<h2>🗺️ Google Maps</h2><p>Explora la ciudad. Los lugares DEMO no tienen marcadores ni rutas porque son ficticios.</p><div class="map-actions"><button id="gps">Usar mi ubicación</button><button id="clear-gps" hidden>Olvidar ubicación</button><a id="city-maps" target="_blank" rel="noopener noreferrer">Explorar en Google Maps ↗</a></div><p id="gps-status" role="status">Ubicación desactivada. Solo se usa durante esta sesión; al conectar el mapa se comparte con Google para mostrar tu marcador.</p><details><summary>Conectar Google Maps</summary><p>Introduce una clave restringida de Maps JavaScript API con facturación habilitada. Se utilizará solo en esta pestaña.</p><form id="maps-config"><label>Clave de Google Maps<input id="maps-key" type="password" autocomplete="off" required></label><button>Conectar mapa</button></form></details><p id="maps-status" role="status">Puedes explorar Google Maps sin conectar una clave.</p><div id="google-map" hidden aria-label="Mapa de la ciudad"></div>`;
+panel.innerHTML=`<h2>🗺️ Google Maps</h2><p>Explora la ciudad. El mapa muestra solo ubicaciones documentadas; los lugares DEMO son ficticios.</p><div class="map-actions"><button id="gps">Usar mi ubicación</button><button id="clear-gps" hidden>Olvidar ubicación</button><a id="city-maps" target="_blank" rel="noopener noreferrer">Explorar en Google Maps ↗</a></div><p id="gps-status" role="status">Ubicación desactivada. Solo se usa durante esta sesión; al conectar el mapa se comparte con Google para mostrar tu marcador.</p><details><summary>Conectar Google Maps</summary><p>Introduce una clave restringida de Maps JavaScript API con facturación habilitada. Se utilizará solo en esta pestaña.</p><form id="maps-config"><label>Clave de Google Maps<input id="maps-key" type="password" autocomplete="off" required></label><button>Conectar mapa</button></form></details><p id="maps-status" role="status">Puedes explorar Google Maps sin conectar una clave.</p><div id="google-map" hidden aria-label="Mapa de la ciudad"></div>`;
 root.before(panel);
 const gps=panel.querySelector("#gps"), gpsStatus=panel.querySelector("#gps-status"), clearGps=panel.querySelector("#clear-gps");
 let gpsRequest=0;
@@ -50,21 +54,32 @@ gps.onclick=()=>{
     position={lat:result.coords.latitude,lng:result.coords.longitude};
     gps.disabled=false;clearGps.hidden=false;
     gpsStatus.textContent=`Ubicación obtenida · precisión aproximada: ${Math.round(result.coords.accuracy)} m. Los lugares DEMO conservan distancias simuladas.`;
-    render();
+    render();realCatalog.setPosition(position);
   },error=>{
     if(request!==gpsRequest)return;
     gps.disabled=false;gpsStatus.textContent=({1:"Permiso de ubicación denegado. Puedes habilitarlo en el navegador.",2:"No se pudo obtener la ubicación.",3:"Se agotó el tiempo para obtener la ubicación."})[error.code]||"No se pudo obtener la ubicación.";
   },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 };
-clearGps.onclick=()=>{gpsRequest++;position=null;gps.disabled=false;clearGps.hidden=true;gpsStatus.textContent="Ubicación olvidada.";render();};
+clearGps.onclick=()=>{gpsRequest++;position=null;gps.disabled=false;clearGps.hidden=true;gpsStatus.textContent="Ubicación olvidada.";render();realCatalog.setPosition(null);};
 const cityLink=panel.querySelector("#city-maps");
-function updateCityLink(){cityLink.href="https://www.google.com/maps/search/?"+new URLSearchParams({api:"1",query:state.city+", Veracruz, México"});}
+function updateCityLink(){cityLink.href="https://www.google.com/maps/search/?"+new URLSearchParams({api:"1",query:(activeMode==="real"?realMapCity:state.city)+", Veracruz, México"});}
 root.addEventListener("change",updateCityLink);updateCityLink();
 panel.querySelector("#maps-config").onsubmit=async event=>{
   event.preventDefault();
   const input=panel.querySelector("#maps-key"), button=event.submitter, status=panel.querySelector("#maps-status"), canvas=panel.querySelector("#google-map");
   const key=input.value.trim();if(!key)return;
   button.disabled=true;input.value="";status.textContent="Cargando mapa…";canvas.hidden=false;
-  try {await loadMap(key,canvas);updateMap(state.city,list(),position);status.textContent="Mapa conectado. Solo se marcan lugares con coordenadas verificadas.";}
+  try {await loadMap(key,canvas);syncMap();status.textContent="Mapa conectado. Solo se marcan lugares con coordenadas verificadas.";}
   catch(error){status.textContent=error.message;canvas.hidden=true;status.textContent+=" Recarga la página para volver a intentar.";}
 };
+
+const tabs=document.createElement("nav");tabs.className="catalog-tabs";tabs.setAttribute("aria-label","Elegir catálogo");
+tabs.innerHTML='<button data-mode="real" aria-pressed="true">Lugares reales</button><button data-mode="demo" aria-pressed="false">Radar DEMO</button>';
+const realHost=document.createElement("main");realHost.className="real-host";
+root.before(tabs,realHost);root.hidden=true;
+const realCatalog=mountCatalog(realHost,(city,selected)=>{realMapCity=city;realMapPlaces=selected;syncMap();updateCityLink()});
+tabs.querySelectorAll("button").forEach(button=>button.onclick=()=>{
+  activeMode=button.dataset.mode;root.hidden=activeMode!=="demo";realHost.hidden=activeMode!=="real";
+  tabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+  syncMap();updateCityLink();
+});
