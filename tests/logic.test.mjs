@@ -10,3 +10,21 @@ test("city limits catalog",()=>{assert.ok(filterPlaces(places,{city:"Córdoba"})
 test("search finds places by name",()=>{assert.equal(filterPlaces(places,{city:"Veracruz",search:"Terraza"}).length,1)});
 test("rating filters to 6-star scale",()=>{assert.ok(filterPlaces(places,{city:"Córdoba",minimumRating:5}).every(p=>p.rating>=5))});
 test("compass shows only places in forward field of view",()=>{assert.ok(visibleOnCompass(places,90,90).every(p=>Math.abs(relativeBearing(p.bearing,90))<=45))});
+
+import { hasCoordinates, directionsUrl, distanceMeters } from '../web/maps.js';
+test('demo places never receive real routes', () => {
+  for (const place of places) assert.equal(directionsUrl(place), null);
+  assert.equal(hasCoordinates({lat:19,lng:-96}),false);
+  assert.equal(hasCoordinates({lat:91,lng:0,locationVerified:true}),false);
+});
+test('verified coordinates produce an encoded Google Maps route', () => {
+  const url=new URL(directionsUrl({lat:19.1,lng:-96.1,locationVerified:true}));
+  assert.equal(url.origin,'https://www.google.com');
+  assert.equal(url.searchParams.get('api'),'1');
+  assert.equal(url.searchParams.get('destination'),'19.1,-96.1');
+});
+test('GPS distance handles identical points, equator and date line', () => {
+  assert.equal(distanceMeters({lat:0,lng:0},{lat:0,lng:0}),0);
+  assert.ok(Math.abs(distanceMeters({lat:0,lng:0},{lat:0,lng:1})-111195)<=1);
+  assert.ok(Math.abs(distanceMeters({lat:0,lng:179},{lat:0,lng:-179})-222390)<=1);
+});

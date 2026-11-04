@@ -2,7 +2,7 @@
 
 **Explorador urbano y comercial** para Veracruz, Córdoba y otras ciudades mexicanas.
 
-> **Estado:** prototipo funcional / validación técnica. Sin comercios afiliados, descuentos reales ni rastreo activo.
+> **Estado:** prototipo funcional / validación técnica. Sin comercios afiliados ni descuentos reales. GPS opcional, sin seguimiento continuo.
 
 ## Objetivo
 Ayudar a descubrir comida, playas, plazas y servicios mediante búsqueda, categorías, puntuaciones sobre seis estrellas y un radar tipo videojuego. La operación local puede generar ingresos a través de acuerdos comerciales verificables, sin vender datos de localización.
@@ -47,3 +47,16 @@ No se ha elegido una licencia de distribución; no se concede una licencia adici
 
 ---
 Desarrollado como prototipo exploratorio de BlackMamba Corp.
+
+## Google Maps y GPS
+
+Ejecuta `npm start` y abre http://127.0.0.1:8000. La sección Google Maps permite:
+- Abrir la ciudad seleccionada en Google Maps sin clave.
+- Obtener ubicación bajo permiso con «Usar mi ubicación» y eliminarla con «Olvidar ubicación». No se guarda en disco ni se envía a nuestro servidor. Si conectas el mapa, las coordenadas se comparten con Google para dibujar tu marcador.
+- Conectar un mapa interactivo introduciendo una clave en «Conectar Google Maps». La clave solo se conserva en la pestaña y se envía a Google para cargar su API; no se incorpora al repositorio.
+
+En Google Cloud, habilita **Maps JavaScript API** y facturación. Restringe la clave a esa API y a los referentes HTTP `http://127.0.0.1:8000/*`, `http://localhost:8000/*` y tu dominio de producción. Configura cuotas y alertas de presupuesto. La ubicación requiere localhost o HTTPS y permiso del navegador.
+
+Los negocios actuales siguen siendo ficticios: no se les asignan coordenadas reales ni rutas. Para incorporar un lugar verificado, añade `lat`, `lng` y `locationVerified: true` al registro, documentando su fuente. Entonces aparecerá su marcador y «Cómo llegar»; con GPS se calculará la distancia en línea recta. El radar sigue siendo una simulación y no representa la orientación física del teléfono. Places API aún no está integrada.
+
+Documentación: [carga de Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/load-maps-js-api) · [Maps URLs](https://developers.google.com/maps/documentation/urls/get-started).
